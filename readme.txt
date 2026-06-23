@@ -3,7 +3,7 @@ Contributors: mixbusmarketing
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,13 @@ No. It only ever changes the level of the currently logged-in user.
 By default only administrators (`manage_options`). Use the `brm_ls_required_cap` filter to change the required capability.
 
 == Changelog ==
+
+= 1.1.0 =
+* Added a settings page under the BricksMembers menu (falls back to Settings if that menu is unavailable).
+* New option: multi-select mode — hold several levels at once, toggling each on/off (off by default = single-level replace).
+* New option: choose which levels appear in the switcher dropdown.
+* New option: choose which user roles may use the switcher (administrators always allowed; on-page warning for non-admin roles).
+* Added a Settings action link on the Plugins screen.
 
 = 1.0.0 =
 * Initial release.

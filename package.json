@@ -1,6 +1,6 @@
 {
   "name": "brm-level-switcher",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Dev utility: switch the current user's BricksMembers level straight from the WordPress admin bar.",
   "private": true,
   "license": "GPL-2.0-or-later",
