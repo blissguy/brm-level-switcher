@@ -3,7 +3,7 @@
  * Plugin Name:       BRM Level Switcher
  * Plugin URI:        https://github.com/blissguy/brm-level-switcher
  * Description:        Dev utility: switch the current user's BricksMembers level straight from the admin bar. Pick a level, the page reloads, and the new level takes effect. Configurable via a settings page under the BricksMembers menu.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Author:            Mixbus Marketing
  * Author URI:        https://mixbusmarketing.com
  * License:           GPL-2.0-or-later
@@ -31,6 +31,9 @@ const ACTION = 'brm_ls_switch_level';
 
 /** Nonce action base for switch links. */
 const NONCE_ACTION = 'brm_ls_switch_level';
+
+/** Query arg appended to the post-switch redirect to bypass full-page caches once. */
+const CACHE_BUST_ARG = 'brm_ls_cb';
 
 /** Option key for plugin settings. */
 const OPTION = 'brm_ls_settings';
@@ -312,6 +315,11 @@ function handle_switch(): void {
 		$redirect = wp_get_referer() ?: home_url( '/' );
 	}
 
+	// Append a one-time cache-busting marker so any full-page cache treats the
+	// post-switch reload as a miss and renders fresh content for the new level.
+	// It is removed from the address bar client-side on load (see strip_cache_bust_arg).
+	$redirect = add_query_arg( CACHE_BUST_ARG, (string) time(), $redirect );
+
 	wp_safe_redirect( $redirect );
 	exit;
 }
@@ -329,6 +337,40 @@ function admin_bar_styles(): void {
 		#wpadminbar #wp-admin-bar-brm-level-switcher .brm-ls-check--empty { color:transparent; }
 		#wpadminbar #wp-admin-bar-brm-level-switcher > .ab-item .ab-icon::before { top:2px; }
 	</style>
+	<?php
+}
+
+/**
+ * Remove the one-time cache-busting arg from the address bar after the reload.
+ *
+ * The server already saw the arg (forcing a full-page-cache miss and a fresh
+ * render for the new level); this only tidies the client-side URL so the marker
+ * isn't bookmarked, shared, or left lingering. No-op when the arg is absent.
+ */
+function strip_cache_bust_arg(): void {
+	if ( ! isset( $_GET[ CACHE_BUST_ARG ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only URL cleanup, no state change.
+		return;
+	}
+	$arg = wp_json_encode( CACHE_BUST_ARG );
+	?>
+	<script id="brm-ls-cb-clean">
+		( function () {
+			var strip = function () {
+				try {
+					var u = new URL( window.location.href );
+					if ( u.searchParams.has( <?php echo $arg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode is safe JS output. ?> ) ) {
+						u.searchParams.delete( <?php echo $arg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode is safe JS output. ?> );
+						window.history.replaceState( null, '', u.toString() );
+					}
+				} catch ( e ) {}
+			};
+			if ( document.readyState === 'loading' ) {
+				document.addEventListener( 'DOMContentLoaded', strip );
+			} else {
+				strip();
+			}
+		}() );
+	</script>
 	<?php
 }
 
@@ -542,6 +584,8 @@ add_action( 'admin_bar_menu', __NAMESPACE__ . '\\admin_bar_menu', 100 );
 add_action( 'admin_post_' . ACTION, __NAMESPACE__ . '\\handle_switch' );
 add_action( 'wp_head', __NAMESPACE__ . '\\admin_bar_styles' );
 add_action( 'admin_head', __NAMESPACE__ . '\\admin_bar_styles' );
+add_action( 'wp_footer', __NAMESPACE__ . '\\strip_cache_bust_arg' );
+add_action( 'admin_footer', __NAMESPACE__ . '\\strip_cache_bust_arg' );
 add_action( 'admin_menu', __NAMESPACE__ . '\\register_settings_page', 100 );
 add_action( 'admin_init', __NAMESPACE__ . '\\register_settings' );
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), __NAMESPACE__ . '\\plugin_action_links' );

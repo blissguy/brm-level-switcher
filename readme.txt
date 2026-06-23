@@ -3,7 +3,7 @@ Contributors: mixbusmarketing
 Requires at least: 6.2
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,9 @@ No. It only ever changes the level of the currently logged-in user.
 By default only administrators (`manage_options`). Use the `brm_ls_required_cap` filter to change the required capability.
 
 == Changelog ==
+
+= 1.1.1 =
+* Added a one-time cache-busting marker to the post-switch redirect so full-page caches serve a fresh render for the newly selected level. The marker is stripped from the address bar on load. Note: BricksMembers recommends not full-page caching membership pages / excluding logged-in users — this is a safety net, not a substitute for correct cache configuration.
 
 = 1.1.0 =
 * Added a settings page under the BricksMembers menu (falls back to Settings if that menu is unavailable).
