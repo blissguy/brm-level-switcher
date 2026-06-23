@@ -1,0 +1,12 @@
+# Files and folders that should NOT ship inside the distributed plugin ZIP.
+.git
+.github
+.gitignore
+.distignore
+package.json
+package-lock.json
+node_modules
+build
+*.zip
+.DS_Store
+.editorconfig
