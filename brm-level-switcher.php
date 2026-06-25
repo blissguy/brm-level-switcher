@@ -3,7 +3,7 @@
  * Plugin Name:       BRM Level Switcher
  * Plugin URI:        https://github.com/blissguy/brm-level-switcher
  * Description:        Dev utility: switch the current user's BricksMembers level straight from the admin bar. Pick a level, the page reloads, and the new level takes effect. Configurable via a settings page under the BricksMembers menu.
- * Version:           1.1.1
+ * Version:           1.1.2
  * Author:            Mixbus Marketing
  * Author URI:        https://mixbusmarketing.com
  * License:           GPL-2.0-or-later
@@ -308,6 +308,15 @@ function handle_switch(): void {
 			// Replace mode: the chosen level becomes the only level.
 			brm_set_user_levels( $user_id, array( $level_id ) );
 		}
+
+		// Bust the persistent object cache so the new level shows on the next
+		// render instead of waiting out BRM's object-cache TTL. Runs only on the
+		// gated, nonce-checked admin switch action.
+		//
+		// wp_cache_flush() clears the object cache for ALL users, so the next
+		// request rebuilds from the DB. That's acceptable for this admin/dev-only
+		// tool.
+		wp_cache_flush();
 	}
 
 	$redirect = isset( $_GET['redirect'] ) ? esc_url_raw( wp_unslash( $_GET['redirect'] ) ) : '';
